@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Playbook Táctico</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--surface:#161616;--surface2:#1f1f1f;--surface3:#272727;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#f0f0f0;--text2:#8a8a8a;--text3:#555;
+  --accent:#e8ff47;--blue:#4db8ff;--green:#5eff9e;--orange:#ffaa2e;
+  --pitch:#1a6b2e;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;min-height:100vh}
+body{padding:12px;padding-bottom:40px}
+.container{max-width:560px;margin:0 auto}
+.masthead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.eyebrow{font-family:'Courier New',monospace;font-size:10px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+.titulo{font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:32px;letter-spacing:.04em;line-height:1}
+.live{display:flex;align-items:center;gap:6px;font-family:'Courier New',monospace;font-size:10px;color:var(--text2);letter-spacing:.1em}
+.live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.play-header{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.play-icon{font-size:26px}
+.play-name{font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:22px;letter-spacing:.08em;color:var(--accent);line-height:1}
+.play-desc{font-size:11px;color:var(--text2);margin-top:3px}
+.field-wrapper{border-radius:10px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 0 1px var(--border);margin-bottom:14px}
+.field{position:relative;width:100%;aspect-ratio:1.8/1;background:var(--pitch);overflow:hidden}
+.field::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 22px,rgba(0,0,0,.07) 22px,rgba(0,0,0,.07) 44px);pointer-events:none}
+.player{position:absolute;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:9px;font-weight:700;transition:left .5s cubic-bezier(.4,0,.2,1),top .5s cubic-bezier(.4,0,.2,1);transform:translate(-50%,-50%);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+@media(min-width:480px){.player{width:32px;height:32px;font-size:10px}}
+.player.gk{background:#f5a623;color:#5a3800;border:2px solid #e09010}
+.player.def{background:#4db8ff;color:#003a5c;border:2px solid #2299e0}
+.player.mid{background:#5eff9e;color:#004a22;border:2px solid #30d070}
+.player.fwd{background:#ff6b6b;color:#5c0000;border:2px solid #e04444}
+.player.hl{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(232,255,71,.9),0 2px 8px rgba(0,0,0,.4)}50%{box-shadow:0 0 0 7px rgba(232,255,71,.2),0 2px 8px rgba(0,0,0,.4)}}
+.zone{position:absolute;pointer-events:none;display:none;border-radius:6px}
+.zone-base{border:2px dashed rgba(77,184,255,.7);background:rgba(77,184,255,.1)}
+.zone-alta{border:2px dashed rgba(255,170,46,.7);background:rgba(255,170,46,.1)}
+.tree{display:flex;flex-direction:column;gap:8px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;transition:border-color .2s,opacity .2s}
+.step.off{opacity:.35;pointer-events:none}
+.step.on{border-color:var(--border2)}
+.step-label{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:var(--text2);flex-shrink:0}
+.step.on .step-num{background:var(--accent);color:#0d0d0d}
+.step-txt{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;text-transform:uppercase}
+.step.on .step-txt{color:var(--text)}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{flex:1;min-width:calc(33.33% - 6px);padding:9px 8px;font-size:11px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;border-radius:7px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .15s;text-align:center}
+.opt:active{transform:scale(.97)}
+.opt.sel{background:var(--accent);border-color:var(--accent);color:#0d0d0d}
+.result{margin-top:10px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px;line-height:1.7;color:var(--text2)}
+.result.ok{border-color:rgba(232,255,71,.2)}
+.tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-family:'Courier New',monospace;font-size:10px;font-weight:700;margin:2px 3px;letter-spacing:.05em}
+.tag.id{background:var(--accent);color:#0d0d0d}
+.tag.base{background:rgba(77,184,255,.15);color:var(--blue);border:1px solid rgba(77,184,255,.3)}
+.tag.alta{background:rgba(255,170,46,.15);color:var(--orange);border:1px solid rgba(255,170,46,.3)}
+.tag.comp{background:rgba(94,255,158,.15);color:var(--green);border:1px solid rgba(94,255,158,.3)}
+.tag.ok2{background:rgba(94,255,158,.2);color:var(--green)}
+.reset-btn{width:100%;padding:12px;margin-top:10px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:8px;background:transparent;border:1px solid var(--border2);color:var(--text2);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Sistema Táctico</div>
+      <div class="titulo">Playbook</div>
+    </div>
+    <div class="live">EN VIVO</div>
+  </div>
+  <div class="play-header">
+    <div class="play-icon">🍫</div>
+    <div>
+      <div class="play-name">CHOCOLATE</div>
+      <div class="play-desc">4v3 en mediocampo formando cuadrado (BASE + ALTA)</div>
+    </div>
+  </div>
+  <div class="field-wrapper">
+    <div class="field" id="field">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 200 100" preserveAspectRatio="none">
+        <rect x="2" y="2" width="196" height="96" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="0.6"/>
+        <line x1="100" y1="2" x2="100" y2="98" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <circle cx="100" cy="50" r="10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <rect x="2" y="30" width="14" height="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <rect x="184" y="30" width="14" height="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <rect x="2" y="38" width="6" height="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.25)" stroke-width="0.4"/>
+        <rect x="192" y="38" width="6" height="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.25)" stroke-width="0.4"/>
+        <circle cx="100" cy="50" r="1.5" fill="rgba(255,255,255,0.5)"/>
+      </svg>
+      <div class="zone zone-base" id="zoneBase"></div>
+      <div class="zone zone-alta" id="zoneAlta"></div>
+      <svg id="arrows" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <marker id="ahy" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="rgba(232,255,71,0.9)"/></marker>
+          <marker id="ahg" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="rgba(94,255,158,0.9)"/></marker>
+          <marker id="ahb" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="rgba(77,184,255,0.9)"/></marker>
+          <marker id="aho" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="rgba(255,170,46,0.9)"/></marker>
+          <marker id="ahr" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="rgba(255,82,82,0.9)"/></marker>
+        </defs>
+      </svg>
+      <div class="player gk"  id="p1"  style="left:6%;top:50%">1</div>
+      <div class="player def" id="p2"  style="left:18%;top:85%">2</div>
+      <div class="player def" id="p3"  style="left:18%;top:62%">3</div>
+      <div class="player def" id="p4"  style="left:18%;top:38%">4</div>
+      <div class="player def" id="p5"  style="left:18%;top:15%">5</div>
+      <div class="player mid" id="p6"  style="left:30%;top:50%">6</div>
+      <div class="player mid" id="p8"  style="left:40%;top:28%">8</div>
+      <div class="player mid" id="p10" style="left:40%;top:72%">10</div>
+      <div class="player fwd" id="p7"  style="left:65%;top:85%">7</div>
+      <div class="player fwd" id="p9"  style="left:68%;top:50%">9</div>
+      <div class="player fwd" id="p11" style="left:65%;top:15%">11</div>
+    </div>
+  </div>
+  <div class="tree">
+    <div class="step on" id="box1">
+      <div class="step-label">
+        <div class="step-num">1</div>
+        <div class="step-txt" id="lbl1">quien inicia a la base</div>
+      </div>
+      <div class="opts" id="opts1"></div>
+    </div>
+    <div class="step off" id="box2">
+      <div class="step-label">
+        <div class="step-num">2</div>
+        <div class="step-txt" id="lbl2">Parte alta de la caja</div>
+      </div>
+      <div class="opts" id="opts2"></div>
+    </div>
+    <div class="step off" id="box3">
+      <div class="step-label">
+        <div class="step-num">3</div>
+        <div class="step-txt" id="lbl3">Finalizacion</div>
+      </div>
+      <div class="opts" id="opts3"></div>
+    </div>
+  </div>
+  <div class="result" id="result">Selecciona una opcion para ver la jugada.</div>
+  <button class="reset-btn" id="btnReset">Reiniciar jugada</button>
+</div>
+
+<script>
+var BASE = {
+  1:{x:6,y:50}, 2:{x:18,y:85}, 3:{x:18,y:62}, 4:{x:18,y:38}, 5:{x:18,y:15},
+  6:{x:30,y:50}, 8:{x:40,y:28}, 10:{x:40,y:72},
+  7:{x:65,y:85}, 9:{x:68,y:50}, 11:{x:65,y:15}
+};
+var POS = {
+  baseAbajo:{x:30,y:62}, baseArriba:{x:30,y:38},
+  altaAbajo:{x:48,y:68}, altaArriba:{x:48,y:32},
+  delAbajo:{x:65,y:85},  delArriba:{x:65,y:15}
+};
+var s1=null, s2=null, s3=null;
+
+function gi(n){ return document.getElementById(n); }
+
+function mv(n,x,y,hl){
+  var el=gi('p'+n); if(!el)return;
+  el.style.left=x+'%'; el.style.top=y+'%';
+  if(hl) el.classList.add('hl');
+}
+
+function arrow(fx,fy,tx,ty,c){
+  var mk={y:'ahy',g:'ahg',b:'ahb',o:'aho',r:'ahr'};
+  var cl={y:'rgba(232,255,71,0.8)',g:'rgba(94,255,158,0.8)',b:'rgba(77,184,255,0.8)',o:'rgba(255,170,46,0.8)',r:'rgba(255,82,82,0.8)'};
+  var svg=gi('arrows');
+  var l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',fx+'%'); l.setAttribute('y1',fy+'%');
+  l.setAttribute('x2',tx+'%'); l.setAttribute('y2',ty+'%');
+  l.setAttribute('stroke',cl[c]); l.setAttribute('stroke-width','1.8');
+  l.setAttribute('stroke-dasharray','4 2');
+  l.setAttribute('marker-end','url(#'+mk[c]+')');
+  svg.appendChild(l);
+}
+
+function showZone(zid,x,y,w,h){
+  var z=gi(zid); z.style.display='block';
+  z.style.left=x+'%'; z.style.top=y+'%';
+  z.style.width=w+'%'; z.style.height=h+'%';
+}
+
+function resetField(){
+  var svg=gi('arrows');
+  var defs=svg.querySelector('defs');
+  svg.innerHTML=''; svg.appendChild(defs);
+  gi('zoneBase').style.display='none';
+  gi('zoneAlta').style.display='none';
+  var ns=[1,2,3,4,5,6,7,8,9,10,11];
+  for(var i=0;i<ns.length;i++){
+    var el=gi('p'+ns[i]); if(!el)continue;
+    el.style.left=BASE[ns[i]].x+'%';
+    el.style.top=BASE[ns[i]].y+'%';
+    el.classList.remove('hl');
+  }
+}
+
+function stepOn(n){ gi('box'+n).classList.remove('off'); gi('box'+n).classList.add('on'); }
+function stepOff(n,msg){
+  gi('box'+n).classList.add('off'); gi('box'+n).classList.remove('on');
+  gi('opts'+n).innerHTML=msg?'<span style="font-size:11px;color:var(--text3)">'+msg+'</span>':'';
+}
+
+function addOpt(cid,text,fn){
+  var b=document.createElement('button');
+  b.className='opt'; b.textContent=text;
+  b.onclick=fn;
+  gi(cid).appendChild(b);
+}
+
+function markSel(cid,text){
+  var bs=gi(cid).querySelectorAll('.opt');
+  for(var i=0;i<bs.length;i++) bs[i].classList.toggle('sel',bs[i].textContent===text);
+}
+
+function setResult(html){
+  var r=gi('result'); r.innerHTML=html; r.classList.add('ok');
+}
+
+function resetAll(){
+  s1=null; s2=null; s3=null;
+  resetField();
+  stepOn(1); stepOff(2,''); stepOff(3,'');
+  gi('opts1').innerHTML='';
+  gi('lbl2').textContent='Parte alta de la caja';
+  gi('lbl3').textContent='Finalizacion';
+  var r=gi('result');
+  r.innerHTML='Selecciona una opcion para ver la jugada.';
+  r.classList.remove('ok');
+  buildStep1();
+}
+
+function buildStep1(){
+  gi('opts1').innerHTML='';
+  var ops=['2 sube','9 baja','8 baja','10 baja'];
+  for(var i=0;i<ops.length;i++){
+    (function(o){ addOpt('opts1',o,function(){ selS1(o); }); })(ops[i]);
+  }
+}
+
+function selS1(v){
+  s1=v; s2=null; s3=null;
+  resetField();
+  markSel('opts1',v);
+  gi('opts2').innerHTML=''; gi('opts3').innerHTML='';
+  stepOff(3,'');
+
+  if(v==='2 sube'){
+    stepOff(2,'Jugada terminada');
+    applyChocolate();
+  } else if(v==='9 baja'){
+    stepOn(2);
+    var ops=['9 arriba (6 abajo)','9 abajo (6 arriba)'];
+    for(var i=0;i<ops.length;i++){
+      (function(o){ addOpt('opts2',o,function(){ selS2(o); }); })(ops[i]);
+    }
+    applyChocolate();
+  } else if(v==='8 baja'){
+    stepOn(2);
+    var ops=['9 baja','11 baja','10 cruza'];
+    for(var i=0;i<ops.length;i++){
+      (function(o){ addOpt('opts2',o,function(){ selS2(o); }); })(ops[i]);
+    }
+    applyChocolate();
+  } else if(v==='10 baja'){
+    stepOn(2);
+    var ops=['9 baja','7 baja','8 cruza'];
+    for(var i=0;i<ops.length;i++){
+      (function(o){ addOpt('opts2',o,function(){ selS2(o); }); })(ops[i]);
+    }
+    applyChocolate();
+  }
+}
+
+function selS2(v){
+  s2=v; s3=null;
+  resetField();
+  markSel('opts2',v);
+  gi('opts3').innerHTML='';
+
+  if(s1==='9 baja'){
+    stepOff(3,'Jugada terminada');
+  } else if(s1==='8 baja' && v==='10 cruza'){
+    stepOn(3);
+    var ops=['9 baja','7 baja'];
+    for(var i=0;i<ops.length;i++){
+      (function(o){ addOpt('opts3',o,function(){ selS3(o); }); })(ops[i]);
+    }
+  } else if(s1==='10 baja' && v==='8 cruza'){
+    stepOn(3);
+    var ops=['9 baja','11 baja'];
+    for(var i=0;i<ops.length;i++){
+      (function(o){ addOpt('opts3',o,function(){ selS3(o); }); })(ops[i]);
+    }
+  } else {
+    stepOff(3,'Jugada terminada');
+  }
+  applyChocolate();
+}
+
+function selS3(v){
+  s3=v; resetField(); markSel('opts3',v); applyChocolate();
+}
+
+function applyChocolate(){
+  var baseP=[], altaP=[], comp=null, jugada='';
+
+  if(s1==='2 sube'){
+    jugada='0.A';
+    mv(6,POS.baseArriba.x,POS.baseArriba.y,1); arrow(BASE[6].x,BASE[6].y,POS.baseArriba.x,POS.baseArriba.y,'y');
+    mv(2,POS.baseAbajo.x,POS.baseAbajo.y,1);   arrow(BASE[2].x,BASE[2].y,POS.baseAbajo.x,POS.baseAbajo.y,'b');
+    baseP=['6','2']; altaP=['8','10'];
+    showZone('zoneBase',25,35,12,30); showZone('zoneAlta',38,25,14,50);
+
+  } else if(s1==='9 baja'){
+    var arr = !s2 || s2==='9 arriba (6 abajo)';
+    var p9 = arr ? POS.baseArriba : POS.baseAbajo;
+    var p6 = arr ? POS.baseAbajo  : POS.baseArriba;
+    jugada='1';
+    mv(9,p9.x,p9.y,1); arrow(BASE[9].x,BASE[9].y,p9.x,p9.y,'o');
+    mv(6,p6.x,p6.y,1); arrow(BASE[6].x,BASE[6].y,p6.x,p6.y,'y');
+    baseP=['9','6']; altaP=['8','10'];
+    showZone('zoneBase',25,35,12,30); showZone('zoneAlta',38,25,14,50);
+
+  } else if(s1==='8 baja'){
+    mv(8,POS.baseArriba.x,POS.baseArriba.y,1); arrow(BASE[8].x,BASE[8].y,POS.baseArriba.x,POS.baseArriba.y,'b');
+    mv(6,POS.baseAbajo.x,POS.baseAbajo.y,1);   arrow(BASE[6].x,BASE[6].y,POS.baseAbajo.x,POS.baseAbajo.y,'y');
+    baseP=['6','8']; showZone('zoneBase',25,35,12,30);
+
+    if(s2==='9 baja'){
+      jugada='2.A';
+      mv(9,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[9].x,BASE[9].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+      altaP=['10','9']; showZone('zoneAlta',43,20,12,52);
+
+    } else if(s2==='11 baja'){
+      jugada='2.B';
+      mv(11,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[11].x,BASE[11].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+      mv(5,POS.delArriba.x,POS.delArriba.y,1);    arrow(BASE[5].x,BASE[5].y,POS.delArriba.x,POS.delArriba.y,'g');
+      altaP=['11','10']; comp='5 al del'; showZone('zoneAlta',43,15,12,58);
+
+    } else if(s2==='10 cruza'){
+      mv(10,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[10].x,BASE[10].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+      showZone('zoneAlta',43,20,12,52);
+      if(s3==='9 baja'){
+        jugada='2.C.1';
+        mv(9,POS.altaAbajo.x,POS.altaAbajo.y,1); arrow(BASE[9].x,BASE[9].y,POS.altaAbajo.x,POS.altaAbajo.y,'o');
+        altaP=['10','9'];
+      } else if(s3==='7 baja'){
+        jugada='2.C.2';
+        mv(7,POS.altaAbajo.x,POS.altaAbajo.y,1); arrow(BASE[7].x,BASE[7].y,POS.altaAbajo.x,POS.altaAbajo.y,'o');
+        mv(2,POS.delAbajo.x,POS.delAbajo.y,1);   arrow(BASE[2].x,BASE[2].y,POS.delAbajo.x,POS.delAbajo.y,'g');
+        altaP=['10','7']; comp='2 al del';
+      }
+    }
+
+  } else if(s1==='10 baja'){
+    mv(10,POS.baseAbajo.x,POS.baseAbajo.y,1);   arrow(BASE[10].x,BASE[10].y,POS.baseAbajo.x,POS.baseAbajo.y,'b');
+    mv(6,POS.baseArriba.x,POS.baseArriba.y,1);  arrow(BASE[6].x,BASE[6].y,POS.baseArriba.x,POS.baseArriba.y,'y');
+    baseP=['6','10']; showZone('zoneBase',25,35,12,30);
+
+    if(s2==='9 baja'){
+      jugada='3.A';
+      mv(8,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[8].x,BASE[8].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+      mv(9,POS.altaAbajo.x,POS.altaAbajo.y,1);   arrow(BASE[9].x,BASE[9].y,POS.altaAbajo.x,POS.altaAbajo.y,'o');
+      altaP=['8','9']; showZone('zoneAlta',43,20,12,52);
+
+    } else if(s2==='7 baja'){
+      jugada='3.B';
+      mv(7,POS.altaAbajo.x,POS.altaAbajo.y,1); arrow(BASE[7].x,BASE[7].y,POS.altaAbajo.x,POS.altaAbajo.y,'o');
+      mv(2,POS.delAbajo.x,POS.delAbajo.y,1);   arrow(BASE[2].x,BASE[2].y,POS.delAbajo.x,POS.delAbajo.y,'g');
+      altaP=['7','8']; comp='2 al del'; showZone('zoneAlta',43,20,12,52);
+
+    } else if(s2==='8 cruza'){
+      mv(8,POS.altaAbajo.x,POS.altaAbajo.y,1); arrow(BASE[8].x,BASE[8].y,POS.altaAbajo.x,POS.altaAbajo.y,'o');
+      showZone('zoneAlta',43,20,12,52);
+      if(s3==='9 baja'){
+        jugada='3.C.1';
+        mv(9,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[9].x,BASE[9].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+        altaP=['8','9'];
+      } else if(s3==='11 baja'){
+        jugada='3.C.2';
+        mv(11,POS.altaArriba.x,POS.altaArriba.y,1); arrow(BASE[11].x,BASE[11].y,POS.altaArriba.x,POS.altaArriba.y,'o');
+        mv(5,POS.delArriba.x,POS.delArriba.y,1);    arrow(BASE[5].x,BASE[5].y,POS.delArriba.x,POS.delArriba.y,'g');
+        altaP=['8','11']; comp='5 al del'; showZone('zoneAlta',43,15,12,58);
+      }
+    }
+  }
+
+  var html;
+  if(jugada){
+    html='<span class="tag id">'+jugada+'</span>'
+        +' <span class="tag base">BASE: '+baseP.join('+')+'</span>'
+        +' <span class="tag alta">ALTA: '+altaP.join('+')+'</span>'
+        +(comp?' <span class="tag comp">'+comp+'</span>':'')
+        +' <span class="tag ok2">4v3</span>';
+  } else {
+    html='Secuencia: <strong>'+[s1,s2,s3].filter(Boolean).join(' - ')+'</strong>';
+  }
+  setResult(html);
+}
+
+gi('btnReset').onclick = resetAll;
+buildStep1();
+</script>
+</body>
+</html>
